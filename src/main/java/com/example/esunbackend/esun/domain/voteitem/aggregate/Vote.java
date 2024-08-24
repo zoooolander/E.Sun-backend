@@ -5,9 +5,10 @@ import com.example.esunbackend.esun.domain.pollitem.aggregate.PollItem;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 @Entity
 @Table(name = "vote")
 public class Vote extends BaseAggregate<Vote>{
@@ -24,10 +25,6 @@ public class Vote extends BaseAggregate<Vote>{
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    // 構造函數
-    public Vote() {
-    }
 
     public Vote(PollItem pollItem, Long userId) {
         this.pollItem = pollItem;
