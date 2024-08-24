@@ -1,0 +1,62 @@
+1. DDL
+-- 創建投票項目表
+CREATE TABLE poll_item (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 創建投票記錄表
+CREATE TABLE vote (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    poll_item_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (poll_item_id) REFERENCES poll_item(id)
+);
+
+-- 創建索引以提高查詢效率
+CREATE INDEX idx_poll_item_id ON vote (poll_item_id);
+CREATE INDEX idx_user_id ON vote (user_id);
+
+-- 創建唯一約束以防止重複投票
+ALTER TABLE vote ADD CONSTRAINT uc_poll_user UNIQUE (poll_item_id, user_id);
+
+2. DML
+-- 插入示例投票項目
+INSERT INTO poll_item (title, description) VALUES 
+('最喜歡的程式語言', '請選擇你最喜歡的程式語言'),
+('最常用的開發工具', '你最常使用哪種開發工具?'),
+('最期待的技術趨勢', '你最期待哪種技術趨勢?');
+
+-- 插入示例投票記錄
+INSERT INTO vote (poll_item_id, user_id) VALUES 
+(1, 101),
+(1, 102),
+(1, 103),
+(2, 101),
+(2, 104),
+(3, 102),
+(3, 103),
+(3, 104);
+
+3. 存儲過程
+DELIMITER //
+
+CREATE PROCEDURE GetPollResults()
+BEGIN
+    SELECT 
+        p.id, 
+        p.title, 
+        COUNT(v.id) as vote_count
+    FROM 
+        poll_item p
+    LEFT JOIN 
+        vote v ON p.id = v.poll_item_id
+    GROUP BY 
+        p.id, p.title;
+END //
+
+DELIMITER ;
